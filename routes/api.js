@@ -1,47 +1,92 @@
-/*
-*
-*
-*       Complete the API routing below
-*       
-*       
-*/
-
 'use strict';
+const mongoose = require('mongoose');
+const Book = require('../model/book');
+
 
 module.exports = function (app) {
 
-  app.route('/api/books')
-    .get(function (req, res){
-      //response will be array of book objects
-      //json res format: [{"_id": bookid, "title": book_title, "commentcount": num_of_comments },...]
-    })
+  app.get('/api/books', async (req, res) => {
     
-    .post(function (req, res){
-      let title = req.body.title;
-      //response will contain new book object including atleast _id and title
+      Book.find({}, (err, data) => {
+       if(err){
+        res.send(err);
+       }
+        else{
+          res.json(data);
+        }
+      })
     })
-    
-    .delete(function(req, res){
-      //if successful response will be 'complete delete successful'
-    });
 
+  app.post('/api/books', async (req, res) => {
+    let title = req.body.title;
 
+    Book.create({
+      title:title,
+      commentcount:0
+    },(err,data)=>{
+      if(err || !data){
+        res.send("missing required field title");
+      }else{
+        res.json(data);
+      }
 
-  app.route('/api/books/:id')
-    .get(function (req, res){
-      let bookid = req.params.id;
-      //json res format: {"_id": bookid, "title": book_title, "comments": [comment,comment,...]}
     })
+  })
+
+  app.delete('/api/books', async (req, res) => {
     
-    .post(function(req, res){
-      let bookid = req.params.id;
-      let comment = req.body.comment;
-      //json res format same as .get
+    Book.deleteMany({},(err,deleted)=>{
+      if(err || !deleted){
+        res.send("no book exists")
+      }else{
+        res.json("complete delete successful");
+      }
     })
+  })
+
+  app.get('/api/books/:id', async (req, res) => {
+    let bookid=req.params.id;
+
+    Book.findById(bookid,(err,data)=>{
+      if(err || !data){
+        res.send("no book exists");
+      }
+      else{
+        res.json(data);
+      }
+    })
+  })
+
+  app.post('/api/books/:id', async (req, res) => {
+   let bookid=req.params.id;
+   let comment = req.body.comment;
+
+   if(!comment){
+    res.send("missing required field comment");
+   }else{
+
+    Book.findByIdAndUpdate(bookid,{$push:{comments:comment}}, {new:true}, (err,updatedBook)=>{
+      if(err || !updatedBook){
+        res.send("no book exists");
+      }
+      else{
+        res.json(updatedBook);
+      }
+    })
+   }
+
+  })
+
+  app.delete('/api/books/:id', async (req, res) => {
     
-    .delete(function(req, res){
       let bookid = req.params.id;
-      //if successful response will be 'delete successful'
-    });
-  
+    
+    Book.findByIdAndDelete(bookid, (err,book)=>{
+      if(err || !book){
+        res.send("no book exists");
+      }else{
+        res.send("delete successful");
+      }
+    }) 
+  })
 };
