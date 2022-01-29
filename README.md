@@ -5,7 +5,7 @@
 
 
 
-## This project part of free code camp quality assurance module, i learned mocha-chai for testing.  
+## This project is part of free code camp quality assurance module, i learned mocha-chai for testing.  
 ### live demo [here](https://libraryFCCQualityAssurance.karanmj.repl.co)
   
  
